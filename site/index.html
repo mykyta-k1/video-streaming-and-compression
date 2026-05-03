@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StreamLab — Відеотрансляція та Стиснення</title>
+  <link rel="icon" href="images/logo.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -34,6 +35,7 @@
   </div>
 </nav>
 
+<!-- ─── Hero ─── -->
 <section id="hero">
   <video id="hero-video" autoplay muted loop playsinline></video>
   <div class="hero-overlay">
@@ -53,13 +55,18 @@
       <h2>Кодеки стиснення зображень</h2>
       <p>Перетягніть повзунок щоб порівняти оригінал та стиснене зображення</p>
     </div>
+
     <div class="codec-tabs" role="tablist">
-      <button class="tab-btn active" data-codec="jpeg"     role="tab">JPEG</button>
+      <button class="tab-btn active" data-codec="bmp"      role="tab">BMP</button>
+      <button class="tab-btn"        data-codec="jpeg"     role="tab">JPEG</button>
       <button class="tab-btn"        data-codec="webp"     role="tab">WebP</button>
       <button class="tab-btn"        data-codec="avif"     role="tab">AVIF</button>
       <button class="tab-btn"        data-codec="jpeg2000" role="tab">JPEG 2000</button>
     </div>
+
     <div class="tab-content">
+      <p class="codec-description" id="codec-description"></p>
+
       <div class="slider-container" id="slider-container">
         <img class="slider-img" id="after-img" alt="Стиснене зображення">
         <img class="slider-img before-img" id="before-img" alt="Оригінальне зображення">
@@ -71,22 +78,22 @@
             </svg>
           </div>
         </div>
-        <span class="slider-label left">Оригінал</span>
-        <span class="slider-label right" id="codec-label">JPEG</span>
+        <span class="slider-label left" id="slider-left-label">Еталон</span>
+        <span class="slider-label right" id="codec-label">BMP</span>
         <input type="range" class="slider-input" id="slider-input" min="0" max="100" value="50" aria-label="Повзунок порівняння">
       </div>
 
       <div class="codec-meta">
         <div class="meta-item">
-          <span class="meta-label">До</span>
+          <span class="meta-label">Розмір RAW</span>
           <span class="meta-value" id="meta-before">—</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Після</span>
+          <span class="meta-label">Після стиснення</span>
           <span class="meta-value" id="meta-after">—</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Стиснення</span>
+          <span class="meta-label">Зменшення</span>
           <span class="meta-value accent" id="meta-ratio">—</span>
         </div>
         <div class="meta-item">
@@ -121,6 +128,47 @@
       <span>Вкажіть <code>vpsIp</code> та <code>streamKey</code> у файлі <code>config.js</code> для підключення до реального потоку</span>
     </div>
 
+    <!-- Ланцюжок сигналу — повна ширина, над плеєром -->
+    <div class="signal-chain">
+      <div class="signal-step">
+        <div class="signal-node">OBS</div>
+        <span class="signal-desc">Захоплення екрана<br>та кодування</span>
+      </div>
+      <div class="signal-arrow-wrap">
+        <svg viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 12 H40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 4 L46 12 L32 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>RTMP · :1935</span>
+      </div>
+      <div class="signal-step">
+        <div class="signal-node">MediaMTX</div>
+        <span class="signal-desc">Конвертація<br>RTMP → HLS</span>
+      </div>
+      <div class="signal-arrow-wrap">
+        <svg viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 12 H40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 4 L46 12 L32 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>HLS · :8888</span>
+      </div>
+      <div class="signal-step">
+        <div class="signal-node">HLS.js</div>
+        <span class="signal-desc">Програвання<br>у браузері</span>
+      </div>
+      <div class="signal-arrow-wrap">
+        <svg viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 12 H40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 4 L46 12 L32 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>~3–6 с затримка</span>
+      </div>
+      <div class="signal-step">
+        <div class="signal-node">Глядач</div>
+        <span class="signal-desc">Будь-який<br>браузер</span>
+      </div>
+    </div>
+
     <div class="stream-layout">
       <div class="stream-player-wrap">
         <div class="status-badge offline" id="status-badge">⚫ Офлайн</div>
@@ -137,29 +185,6 @@
       </div>
 
       <div class="stream-info">
-        <h3>Шлях сигналу</h3>
-
-        <!-- Схема з явними SVG стрілками -->
-        <div class="flow-diagram">
-          <div class="flow-node">OBS</div>
-          <div class="flow-arrow-wrap">
-            <svg class="flow-arrow-svg" viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 12 H34" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M26 4 L38 12 L26 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>
-            <span class="flow-arrow-label">RTMP</span>
-          </div>
-          <div class="flow-node">MediaMTX</div>
-          <div class="flow-arrow-wrap">
-            <svg class="flow-arrow-svg" viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 12 H34" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M26 4 L38 12 L26 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>
-            <span class="flow-arrow-label">HLS</span>
-          </div>
-          <div class="flow-node">Браузер</div>
-        </div>
-
         <ul class="stream-facts">
           <li><strong>Протокол:</strong> RTMP прийом → HLS відтворення</li>
           <li><strong>Затримка:</strong> ~3–6 с (тривалість HLS-сегменту)</li>
@@ -168,7 +193,7 @@
           <li><strong>Доступ:</strong> Stream Key захищає від сторонніх стрімерів</li>
         </ul>
         <div class="stream-url-block">
-          <div class="cmd-header" style="padding:0; background:none; border:none; margin-bottom:8px;">
+          <div class="cmd-header" style="padding:0;background:none;border:none;margin-bottom:8px;">
             <span class="cmd-label">HLS-адреса</span>
             <button class="copy-btn" id="copy-hls-btn">Копіювати</button>
           </div>
@@ -184,86 +209,131 @@
   <div class="container">
     <div class="section-header">
       <h2>Налаштування OBS</h2>
-      <p>Налаштуйте OBS Studio для відправки потоку до MediaMTX на вашому VPS</p>
+      <p>Покрокова інструкція для відправки потоку з OBS Studio до MediaMTX</p>
     </div>
 
-    <div class="setup-grid">
-      <div class="setup-card">
-        <h3>Налаштування потоку</h3>
-        <div class="settings-table">
-          <div class="setting-row">
-            <span class="setting-key">Сервіс</span>
-            <code class="setting-val">Custom Streaming Server</code>
-          </div>
-          <div class="setting-row">
-            <span class="setting-key">Сервер</span>
-            <code class="setting-val" id="obs-server-val">rtmp://YOUR_VPS_IP:1935/live</code>
-          </div>
-          <div class="setting-row">
-            <span class="setting-key">Ключ потоку</span>
-            <code class="setting-val" id="obs-key-val">YOUR_SECRET_KEY</code>
-          </div>
-        </div>
-        <p class="setup-note">
-          <strong>Як працює Stream Key:</strong> OBS надсилає потік на сервер з вашим ключем.
-          Маніфест HLS доступний за адресою
-          <code>http://VPS:8888/<strong>ВАШ_КЛЮЧ</strong>/index.m3u8</code>.
-          Глядачі бачать відео, але <em>стрімити</em> може лише той хто знає ключ.
-        </p>
-      </div>
+    <div class="obs-steps">
 
-      <div class="setup-card">
-        <h3>Налаштування кодека</h3>
-        <div class="settings-table">
-          <div class="setting-row">
-            <span class="setting-key">Роздільна здатність</span>
-            <code class="setting-val">1280 × 720</code>
-          </div>
-          <div class="setting-row">
-            <span class="setting-key">Кадрів/с</span>
-            <code class="setting-val">30</code>
-          </div>
-          <div class="setting-row">
-            <span class="setting-key">Бітрейт</span>
-            <code class="setting-val">2500 Kbps</code>
-          </div>
-          <div class="setting-row">
-            <span class="setting-key">Кодек</span>
-            <code class="setting-val">x264 (Software)</code>
-          </div>
-          <div class="setting-row">
-            <span class="setting-key">Ключовий кадр</span>
-            <code class="setting-val">2 секунди</code>
-          </div>
+      <!-- Крок 1 -->
+      <div class="obs-step">
+        <div class="step-marker">1</div>
+        <div class="step-body">
+          <h3>Відкрийте налаштування OBS</h3>
+          <p>У головному вікні OBS натисніть меню <strong>Settings</strong> (шестерня внизу праворуч) або перейдіть через <strong>Edit → Settings</strong> у верхньому меню.</p>
         </div>
       </div>
 
-      <div class="setup-card card-wide">
-        <h3>Конфіг MediaMTX</h3>
-        <div class="ffmpeg-block">
-          <div class="cmd-header">
-            <span class="cmd-label">mediamtx.yml</span>
-            <button class="copy-btn" id="copy-mtx-btn">Копіювати</button>
+      <!-- Крок 2 -->
+      <div class="obs-step">
+        <div class="step-marker">2</div>
+        <div class="step-body">
+          <h3>Вкладка Stream — налаштуйте адресу сервера</h3>
+          <p>У лівій панелі налаштувань оберіть розділ <strong>Stream</strong>. Заповніть поля:</p>
+          <div class="settings-table" style="margin-top:16px;">
+            <div class="setting-row">
+              <span class="setting-key">Service</span>
+              <code class="setting-val">Custom...</code>
+            </div>
+            <div class="setting-row">
+              <span class="setting-key">Server</span>
+              <code class="setting-val" id="obs-server-val">rtmp://YOUR_VPS_IP:1935/live</code>
+            </div>
+            <div class="setting-row">
+              <span class="setting-key">Stream Key</span>
+              <code class="setting-val" id="obs-key-val">YOUR_SECRET_KEY</code>
+            </div>
           </div>
-          <pre class="cmd-text" id="mtx-cmd">paths:
-  live:
+          <p class="step-note">Stream Key — це ваш секретний ідентифікатор потоку. Він стає частиною HLS-адреси і захищає від небажаних підключень. Глядачі бачать відео, але стрімити може лише той хто знає ключ.</p>
+        </div>
+      </div>
+
+      <!-- Крок 3 -->
+      <div class="obs-step">
+        <div class="step-marker">3</div>
+        <div class="step-body">
+          <h3>Вкладка Output — налаштуйте кодек та бітрейт</h3>
+          <p>Перейдіть до розділу <strong>Output</strong>. У верхній частині переключіть режим на <strong>Advanced</strong>, потім відкрийте вкладку <strong>Streaming</strong>:</p>
+          <div class="settings-table" style="margin-top:16px;">
+            <div class="setting-row">
+              <span class="setting-key">Encoder</span>
+              <code class="setting-val">x264 (Software)</code>
+            </div>
+            <div class="setting-row">
+              <span class="setting-key">Rate Control</span>
+              <code class="setting-val">CBR</code>
+            </div>
+            <div class="setting-row">
+              <span class="setting-key">Bitrate</span>
+              <code class="setting-val">2500 Kbps</code>
+            </div>
+            <div class="setting-row">
+              <span class="setting-key">Keyframe Interval</span>
+              <code class="setting-val">2 секунди</code>
+            </div>
+          </div>
+          <p class="step-note">Keyframe Interval = 2 с обов'язково збігається з <code>hlsSegmentDuration: 2s</code> у MediaMTX — це забезпечує коректне нарізання HLS-сегментів.</p>
+        </div>
+      </div>
+
+      <!-- Крок 4 -->
+      <div class="obs-step">
+        <div class="step-marker">4</div>
+        <div class="step-body">
+          <h3>Вкладка Video — роздільна здатність і частота кадрів</h3>
+          <p>Перейдіть до розділу <strong>Video</strong> і встановіть:</p>
+          <div class="settings-table" style="margin-top:16px;">
+            <div class="setting-row">
+              <span class="setting-key">Base Resolution</span>
+              <code class="setting-val">1280 × 720</code>
+            </div>
+            <div class="setting-row">
+              <span class="setting-key">Output Resolution</span>
+              <code class="setting-val">1280 × 720</code>
+            </div>
+            <div class="setting-row">
+              <span class="setting-key">Common FPS Values</span>
+              <code class="setting-val">30</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Крок 5 -->
+      <div class="obs-step">
+        <div class="step-marker">5</div>
+        <div class="step-body">
+          <h3>Натисніть OK та запустіть трансляцію</h3>
+          <p>Збережіть налаштування кнопкою <strong>OK</strong>. Поверніться до головного вікна OBS і натисніть кнопку <strong>Start Streaming</strong>. Плеєр на сайті автоматично переключиться з <em>⚫ Офлайн</em> на <em>🔴 LIVE</em> протягом 3–6 секунд.</p>
+
+          <div class="ffmpeg-block" style="margin-top:20px;">
+            <div class="cmd-header">
+              <span class="cmd-label">Конфіг MediaMTX (mediamtx.yml)</span>
+              <button class="copy-btn" id="copy-mtx-btn">Копіювати</button>
+            </div>
+            <pre class="cmd-text" id="mtx-cmd">rtmpAddress: :1935
+
+hlsAddress: :8888
+hlsAllowOrigins: ['*']
+hlsSegmentDuration: 2s
+
+paths:
+  live/mystream:
     source: publisher</pre>
+          </div>
         </div>
-        <p class="setup-note">
-          Завантажте MediaMTX з <strong>github.com/bluenviron/mediamtx</strong>, помістіть конфіг поруч із виконуваним файлом та запустіть <code>./mediamtx</code>.
-          RTMP слухає на порту <code>:1935</code>, HLS роздається на <code>:8888</code>.
-          Переконайтесь що на VPS відкриті обидва порти у firewall.
-        </p>
       </div>
-    </div>
 
+    </div><!-- /obs-steps -->
+
+    <!-- Заглушка для мобільних -->
     <div class="mobile-obs-stub">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M9 17H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-4M12 17v4M7 21h10"/>
       </svg>
       <h3>OBS — програма для комп'ютера</h3>
-      <p>OBS Studio доступний лише для Windows, macOS та Linux.<br>Відкрийте цю сторінку на комп'ютері щоб переглянути повну інструкцію налаштування трансляції.</p>
+      <p>OBS Studio доступний лише для Windows, macOS та Linux.<br>Відкрийте цю сторінку на комп'ютері щоб переглянути повну інструкцію.</p>
     </div>
+
   </div>
 </section>
 
@@ -277,7 +347,6 @@
   </div>
 </footer>
 
-<!-- config.js завантажується перед main.js — визначає STREAMLAB_CONFIG -->
 <script src="config.js"></script>
 <script src="main.js"></script>
 </body>

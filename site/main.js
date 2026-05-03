@@ -1,26 +1,19 @@
 // ─── Конфігурація ────────────────────────────────────────────────────────────
-// Значення беруться з config.js (STREAMLAB_CONFIG).
-// URL-параметри мають вищий пріоритет — зручно для тестування:
-//   http://localhost:3000/?vps=1.2.3.4&key=mykey
-// ─────────────────────────────────────────────────────────────────────────────
-
 (function resolveConfig() {
   const cfg = (typeof STREAMLAB_CONFIG !== 'undefined') ? STREAMLAB_CONFIG : {};
   const params = new URLSearchParams(window.location.search);
-
   window._SL = {
     vpsIp:     params.get('vps') || cfg.vpsIp     || 'YOUR_VPS_IP',
     streamKey: params.get('key') || cfg.streamKey || 'YOUR_SECRET_KEY',
     rtmpPort:  cfg.rtmpPort || 1935,
     hlsPort:   cfg.hlsPort  || 8888,
   };
-
   window._SL.hlsUrl  = `http://${window._SL.vpsIp}:${window._SL.hlsPort}/${window._SL.streamKey}/index.m3u8`;
   window._SL.rtmpUrl = `rtmp://${window._SL.vpsIp}:${window._SL.rtmpPort}/live`;
   window._SL.ready   = window._SL.vpsIp !== 'YOUR_VPS_IP' && window._SL.streamKey !== 'YOUR_SECRET_KEY';
 })();
 
-// ─── Hero відео (Pexels, без водяних знаків) ────────────────────────────────
+// ─── Hero відео ──────────────────────────────────────────────────────────────
 const HERO_VIDEOS = [
   'https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4',
   'https://videos.pexels.com/video-files/2278095/2278095-hd_1920_1080_30fps.mp4',
@@ -28,35 +21,62 @@ const HERO_VIDEOS = [
   'https://videos.pexels.com/video-files/856344/856344-hd_1920_1080_25fps.mp4',
 ];
 
-// ─── Кодеки ─────────────────────────────────────────────────────────────────
+// ─── Кодеки ──────────────────────────────────────────────────────────────────
 const CODECS = {
+  bmp: {
+    label: 'BMP',
+    ext: 'BMP',
+    description: 'Нестиснений формат — пікселі зберігаються як є, без жодної обробки. Максимальна якість, максимальний розмір. Використовується як еталон для порівняння.',
+    original:   'images/original.jpg',
+    compressed: 'images/bmp/uncompressed.bmp',
+    sizeBefore: '—',
+    sizeAfter:  '5.5 МБ',
+    ratio:      '0%',
+    cmd: 'ffmpeg -i input.jpg -f bmp output.bmp',
+  },
   jpeg: {
-    label: 'JPEG', ext: 'JPG',
+    label: 'JPEG',
+    ext: 'JPG',
+    description: 'Lossy-стиснення. Видаляє деталі які людське око погано помічає. При агресивному стисненні з\'являються характерні блочні артефакти.',
     original:   'images/original.jpg',
     compressed: 'images/jpeg/compressed.jpg',
-    sizeBefore: '2.4 МБ', sizeAfter: '320 КБ', ratio: '87%',
-    cmd: 'ffmpeg -i input.png -q:v 2 output.jpg',
+    sizeBefore: '5.5 МБ',
+    sizeAfter:  '320 КБ',
+    ratio:      '94%',
+    cmd: 'ffmpeg -i input.bmp -q:v 2 output.jpg',
   },
   webp: {
-    label: 'WebP', ext: 'WEBP',
+    label: 'WebP',
+    ext: 'WEBP',
+    description: 'Сучасний формат від Google. Підтримує як lossy так і lossless стиснення. При однаковій якості файл менший ніж JPEG на ~25–35%.',
     original:   'images/original.jpg',
     compressed: 'images/webp/compressed.webp',
-    sizeBefore: '2.4 МБ', sizeAfter: '210 КБ', ratio: '91%',
-    cmd: 'ffmpeg -i input.png -c:v libwebp -quality 80 output.webp',
+    sizeBefore: '5.5 МБ',
+    sizeAfter:  '210 КБ',
+    ratio:      '96%',
+    cmd: 'ffmpeg -i input.bmp -c:v libwebp -quality 80 output.webp',
   },
   avif: {
-    label: 'AVIF', ext: 'AVIF',
+    label: 'AVIF',
+    ext: 'AVIF',
+    description: 'Найсучасніший формат на базі кодека AV1. Найкраще стиснення серед усіх — при порівнянній якості файл вдвічі менший за JPEG.',
     original:   'images/original.jpg',
     compressed: 'images/avif/compressed.avif',
-    sizeBefore: '2.4 МБ', sizeAfter: '95 КБ', ratio: '96%',
-    cmd: 'ffmpeg -i input.png -c:v libaom-av1 -crf 30 -b:v 0 output.avif',
+    sizeBefore: '5.5 МБ',
+    sizeAfter:  '95 КБ',
+    ratio:      '98%',
+    cmd: 'ffmpeg -i input.bmp -c:v libaom-av1 -crf 30 -b:v 0 output.avif',
   },
   jpeg2000: {
-    label: 'JPEG 2000', ext: 'JP2',
+    label: 'JPEG 2000',
+    ext: 'JP2',
+    description: 'Wavelet-стиснення. На відміну від JPEG не дає блочних артефактів — деталі розмиваються рівномірно. Популярний у медицині та архівах.',
     original:   'images/original.jpg',
     compressed: 'images/jpeg2000/compressed.jp2',
-    sizeBefore: '2.4 МБ', sizeAfter: '280 КБ', ratio: '88%',
-    cmd: 'ffmpeg -i input.png -c:v jpeg2000 -compression_level 80 output.jp2',
+    sizeBefore: '5.5 МБ',
+    sizeAfter:  '280 КБ',
+    ratio:      '95%',
+    cmd: 'ffmpeg -i input.bmp -c:v jpeg2000 -compression_level 80 output.jp2',
   },
 };
 
@@ -69,6 +89,7 @@ const PLACEHOLDER_SRC = (() => {
   return 'data:image/svg+xml,' + encodeURIComponent(svg);
 })();
 
+// ─── Ініціалізація ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initHeroVideo();
   initNavScroll();
@@ -111,23 +132,32 @@ function initCodecTabs() {
       applyCodec(btn.dataset.codec);
     });
   });
-  applyCodec('jpeg');
+  applyCodec('bmp');
 }
 
 function applyCodec(key) {
   const codec = CODECS[key];
   const beforeImg = document.getElementById('before-img');
   const afterImg  = document.getElementById('after-img');
+
+  // BMP — обидві сторони показують оригінал (немає стиснення)
   beforeImg.src = codec.original;
   afterImg.src  = codec.compressed;
   beforeImg.onerror = () => { beforeImg.src = PLACEHOLDER_SRC; };
   afterImg.onerror  = () => { afterImg.src  = PLACEHOLDER_SRC; };
-  document.getElementById('codec-label').textContent = codec.label;
-  document.getElementById('meta-before').textContent = codec.sizeBefore;
-  document.getElementById('meta-after').textContent  = codec.sizeAfter;
-  document.getElementById('meta-ratio').textContent  = codec.ratio;
-  document.getElementById('meta-format').textContent = codec.ext;
-  document.getElementById('cmd-text').textContent    = codec.cmd;
+
+  document.getElementById('codec-label').textContent      = codec.label;
+  document.getElementById('codec-description').textContent = codec.description;
+  document.getElementById('meta-before').textContent      = codec.sizeBefore;
+  document.getElementById('meta-after').textContent       = codec.sizeAfter;
+  document.getElementById('meta-ratio').textContent       = codec.ratio;
+  document.getElementById('meta-format').textContent      = codec.ext;
+  document.getElementById('cmd-text').textContent         = codec.cmd;
+
+  // Для BMP лівий підпис інший
+  const leftLabel = document.getElementById('slider-left-label');
+  if (leftLabel) leftLabel.textContent = key === 'bmp' ? 'Еталон' : 'Оригінал';
+
   const input = document.getElementById('slider-input');
   input.value = 50;
   updateSliderPosition(50);
