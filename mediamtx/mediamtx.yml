@@ -1,0 +1,9 @@
+rtmpAddress: :1935
+
+hlsAddress: :8888
+hlsAllowOrigins: ['*']
+hlsSegmentDuration: 2s
+
+paths:
+  live/mystream:
+    source: publisher
