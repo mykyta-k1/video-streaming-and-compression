@@ -22,25 +22,14 @@ const HERO_VIDEOS = [
 
 // ─── Кодеки ──────────────────────────────────────────────────────────────────
 const CODECS = {
-  bmp: {
-    label: 'BMP',
-    ext: 'BMP',
-    description: 'Нестиснений формат — пікселі зберігаються як є, без жодної обробки. Максимальна якість, максимальний розмір. Використовується як еталон для порівняння.',
-    original:   'images/original.jpg',
-    compressed: 'images/bmp/uncompressed.bmp',
-    sizeBefore: '—',
-    sizeAfter:  '5.5 МБ',
-    ratio:      '0%',
-    cmd: 'ffmpeg -i input.jpg -f bmp output.bmp',
-  },
   jpeg: {
     label: 'JPEG',
     ext: 'JPG',
     description: 'Lossy-стиснення. Видаляє деталі які людське око погано помічає. При агресивному стисненні з\'являються характерні блочні артефакти.',
-    original:   'images/original.jpg',
+    original:   'images/bmp/original.bmp',
     compressed: 'images/jpeg/compressed.jpg',
-    sizeBefore: '5.5 МБ',
-    sizeAfter:  '320 КБ',
+    sizeBefore: '7.4 МБ',
+    sizeAfter:  '1.1 МБ',
     ratio:      '94%',
     cmd: 'ffmpeg -i input.bmp -q:v 2 output.jpg',
   },
@@ -48,10 +37,10 @@ const CODECS = {
     label: 'WebP',
     ext: 'WEBP',
     description: 'Сучасний формат від Google. Підтримує як lossy так і lossless стиснення. При однаковій якості файл менший ніж JPEG на ~25–35%.',
-    original:   'images/original.jpg',
+    original:   'images/bmp/original.bmp',
     compressed: 'images/webp/compressed.webp',
-    sizeBefore: '5.5 МБ',
-    sizeAfter:  '210 КБ',
+    sizeBefore: '7.4 МБ',
+    sizeAfter:  '620.5 КБ',
     ratio:      '96%',
     cmd: 'ffmpeg -i input.bmp -c:v libwebp -quality 80 output.webp',
   },
@@ -59,24 +48,13 @@ const CODECS = {
     label: 'AVIF',
     ext: 'AVIF',
     description: 'Найсучасніший формат на базі кодека AV1. Найкраще стиснення серед усіх — при порівнянній якості файл вдвічі менший за JPEG.',
-    original:   'images/original.jpg',
+    original:   'images/bmp/original.bmp',
     compressed: 'images/avif/compressed.avif',
-    sizeBefore: '5.5 МБ',
-    sizeAfter:  '95 КБ',
+    sizeBefore: '7.4 МБ',
+    sizeAfter:  '510.3 КБ',
     ratio:      '98%',
     cmd: 'ffmpeg -i input.bmp -c:v libaom-av1 -crf 30 -b:v 0 output.avif',
-  },
-  jpeg2000: {
-    label: 'JPEG 2000',
-    ext: 'JP2',
-    description: 'Wavelet-стиснення. На відміну від JPEG не дає блочних артефактів — деталі розмиваються рівномірно. Популярний у медицині та архівах.',
-    original:   'images/original.jpg',
-    compressed: 'images/jpeg2000/compressed.jp2',
-    sizeBefore: '5.5 МБ',
-    sizeAfter:  '280 КБ',
-    ratio:      '95%',
-    cmd: 'ffmpeg -i input.bmp -c:v jpeg2000 -compression_level 80 output.jp2',
-  },
+  }
 };
 
 const PLACEHOLDER_SRC = (() => {
@@ -131,7 +109,7 @@ function initCodecTabs() {
       applyCodec(btn.dataset.codec);
     });
   });
-  applyCodec('bmp');
+  applyCodec('jpeg');
 }
 
 function applyCodec(key) {
@@ -164,7 +142,56 @@ function applyCodec(key) {
 
 function initSlider() {
   const input = document.getElementById('slider-input');
-  input.addEventListener('input', () => updateSliderPosition(+input.value));
+  const container = document.getElementById('slider-container');
+  
+  // Ініціалізуємо дефолтну позицію
+  updateSliderPosition(50);
+  
+  // Basic input/change event handling
+  input.addEventListener('input', () => updateSliderPosition(+input.value), { passive: true });
+  input.addEventListener('change', () => updateSliderPosition(+input.value));
+  
+  // Enhanced mouse drag support directly on container
+  let isDragging = false;
+  
+  container.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    handleDrag(e);
+  });
+  
+  container.addEventListener('mousemove', (e) => {
+    if (isDragging) handleDrag(e);
+  });
+  
+  container.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+  
+  container.addEventListener('mouseleave', () => {
+    isDragging = false;
+  });
+  
+  // Touch support
+  container.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    handleDrag(e.touches[0]);
+  }, { passive: true });
+  
+  container.addEventListener('touchmove', (e) => {
+    if (isDragging) handleDrag(e.touches[0]);
+  }, { passive: true });
+  
+  container.addEventListener('touchend', () => {
+    isDragging = false;
+  }, { passive: true });
+  
+  function handleDrag(e) {
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    input.value = percent;
+    updateSliderPosition(percent);
+  }
 }
 
 function updateSliderPosition(val) {
