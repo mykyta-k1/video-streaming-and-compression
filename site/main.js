@@ -11,16 +11,14 @@
     useHttps,
   };
   const hlsScheme = window._SL.useHttps ? 'https' : 'http';
-  window._SL.hlsUrl  = `${hlsScheme}://${window._SL.vpsIp}:${window._SL.hlsPort}/${window._SL.streamKey}/index.m3u8`;
+  window._SL.hlsUrl  = `https://${window._SL.vpsIp}:${window._SL.hlsPort}/${window._SL.streamKey}/index.m3u8`;
   window._SL.rtmpUrl = `rtmp://${window._SL.vpsIp}:${window._SL.rtmpPort}/live`;
   window._SL.ready   = Boolean(window._SL.vpsIp && window._SL.streamKey);
 })();
 
 // ─── Hero відео ──────────────────────────────────────────────────────────────
 const HERO_VIDEOS = [
-  'https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4',
   'https://videos.pexels.com/video-files/2278095/2278095-hd_1920_1080_30fps.mp4',
-  'https://videos.pexels.com/video-files/856344/856344-hd_1920_1080_25fps.mp4',
 ];
 
 // ─── Кодеки ──────────────────────────────────────────────────────────────────
