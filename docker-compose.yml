@@ -1,0 +1,19 @@
+services:
+  mediamtx:
+    build:
+      context: ./mediamtx
+      dockerfile: Dockerfile
+    image: streamlab-mediamtx
+    ports:
+      - "1935:1935"
+      - "8888:8888"
+    restart: unless-stopped
+
+  site:
+    build:
+      context: ./site
+      dockerfile: Dockerfile.site
+    image: streamlab-site
+    ports:
+      - "3000:80"
+    restart: unless-stopped
