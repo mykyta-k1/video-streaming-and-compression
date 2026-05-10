@@ -3,4 +3,5 @@ window.STREAMLAB_CONFIG = {
   streamKey: "${STREAM_KEY}",
   rtmpPort:  ${RTMP_PORT},
   hlsPort:   ${HLS_PORT},
+  useHttps:  ${HLS_USE_HTTPS},
 };

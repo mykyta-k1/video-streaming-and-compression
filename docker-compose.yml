@@ -32,6 +32,7 @@ services:
       - STREAM_KEY=${STREAM_KEY}
       - RTMP_PORT=${RTMP_PORT}
       - HLS_PORT=${HLS_PORT}
+      - HLS_USE_HTTPS=${HLS_USE_HTTPS}
 
   nginx:
     image: nginx:alpine
