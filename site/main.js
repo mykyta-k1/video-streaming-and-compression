@@ -1,16 +1,16 @@
 // ─── Конфігурація ────────────────────────────────────────────────────────────
 (function resolveConfig() {
-  const cfg = (typeof STREAMLAB_CONFIG !== 'undefined') ? STREAMLAB_CONFIG : {};
+  const cfg    = window.STREAMLAB_CONFIG || {};
   const params = new URLSearchParams(window.location.search);
   window._SL = {
-    vpsIp:     params.get('vps') || cfg.vpsIp     || 'YOUR_VPS_IP',
-    streamKey: params.get('key') || cfg.streamKey || 'YOUR_SECRET_KEY',
+    vpsIp:     params.get('vps') || cfg.vpsIp     || '',
+    streamKey: params.get('key') || cfg.streamKey || '',
     rtmpPort:  cfg.rtmpPort || 1935,
     hlsPort:   cfg.hlsPort  || 8888,
   };
   window._SL.hlsUrl  = `http://${window._SL.vpsIp}:${window._SL.hlsPort}/${window._SL.streamKey}/index.m3u8`;
   window._SL.rtmpUrl = `rtmp://${window._SL.vpsIp}:${window._SL.rtmpPort}/live`;
-  window._SL.ready   = window._SL.vpsIp !== 'YOUR_VPS_IP' && window._SL.streamKey !== 'YOUR_SECRET_KEY';
+  window._SL.ready   = Boolean(window._SL.vpsIp && window._SL.streamKey);
 })();
 
 // ─── Hero відео ──────────────────────────────────────────────────────────────

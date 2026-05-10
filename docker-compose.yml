@@ -4,16 +4,52 @@ services:
       context: ./mediamtx
       dockerfile: Dockerfile
     image: streamlab-mediamtx
+    container_name: streamlab-mediamtx
     ports:
       - "1935:1935"
       - "8888:8888"
+    networks:
+      - streamlab-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 1935 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
 
-  site:
+  frontend:
     build:
       context: ./site
       dockerfile: Dockerfile.site
-    image: streamlab-site
-    ports:
-      - "3000:80"
+    image: streamlab-frontend
+    container_name: streamlab-frontend
+    depends_on:
+      mediamtx:
+        condition: service_healthy
+    networks:
+      - streamlab-network
     restart: unless-stopped
+    environment:
+      - VPS_IP=${VPS_IP}
+      - STREAM_KEY=${STREAM_KEY}
+      - RTMP_PORT=${RTMP_PORT}
+      - HLS_PORT=${HLS_PORT}
+
+  nginx:
+    image: nginx:alpine
+    container_name: streamlab-nginx
+    ports:
+      - "20030:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - mediamtx
+    networks:
+      - streamlab-network
+    restart: unless-stopped
+
+networks:
+  streamlab-network:
+    driver: bridge

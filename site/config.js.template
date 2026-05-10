@@ -1,0 +1,6 @@
+window.STREAMLAB_CONFIG = {
+  vpsIp:     "${VPS_IP}",
+  streamKey: "${STREAM_KEY}",
+  rtmpPort:  ${RTMP_PORT},
+  hlsPort:   ${HLS_PORT},
+};
