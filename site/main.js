@@ -3,6 +3,7 @@
   const cfg    = window.STREAMLAB_CONFIG || {};
   const params = new URLSearchParams(window.location.search);
   const useHttps = params.get('https') === 'true' || cfg.useHttps === true;
+  
   window._SL = {
     vpsIp:     params.get('vps') || cfg.vpsIp     || '',
     streamKey: params.get('key') || cfg.streamKey || '',
@@ -10,10 +11,11 @@
     hlsPort:   cfg.hlsPort  || 8888,
     useHttps,
   };
+  
   const hlsScheme = window._SL.useHttps ? 'https' : 'http';
-  window._SL.hlsUrl  = `https://${window._SL.vpsIp}:${window._SL.hlsPort}/${window._SL.streamKey}/index.m3u8`;
-  window._SL.rtmpUrl = `rtmp://${window._SL.vpsIp}:${window._SL.rtmpPort}/live`;
-  window._SL.ready   = Boolean(window._SL.vpsIp && window._SL.streamKey);
+    window._SL.hlsUrl = `${hlsScheme}://${window._SL.vpsIp}/stream/${window._SL.streamKey}/index.m3u8`;
+    window._SL.rtmpUrl = `rtmp://${window._SL.vpsIp}:${window._SL.rtmpPort}/live`;
+    window._SL.ready   = Boolean(window._SL.vpsIp && window._SL.streamKey);
 })();
 
 // ─── Hero відео ──────────────────────────────────────────────────────────────
